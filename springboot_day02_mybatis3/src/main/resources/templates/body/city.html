@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html>
+<head th:include="~{fragments/header::header}">
+<meta charset="UTF-8">
+</head>
+<body>
+   <h1 align="center" style="color:green">国家:[[${countryData.countryName}]]       首都:[[${countryData.capitalName}]]</h1>
+       <div class="container">
+			<div class="input-group mb-3">
+			    <input type="text" class="form-control col-sm-3" placeholder="Search" id="searchIds">
+			    <div class="input-group-append">
+			      <button class="btn btn-success" type="submit" id="searchbtnId">搜索</button>  
+			     </div>
+			      <button type="button" class="btn btn-primary" onclick="add()">增加</button>
+			      <button type="button" class="btn btn-info" onclick="flush()">刷新</button>
+			      <button type="button" class="btn btn-warning" id="sortId">人口升降序</button>
+			    </div>
+			</div>
+	       <div id="replacecontainerId" class="container">
+	          <div id="containerId">
+	              <!--数据域 -->
+	 		  <input type="hidden" th:value="${pageData.country.countryId}" id="countryIds">
+			  <table class="table table-hover" id="tableId">
+			    <thead>
+			      <tr>
+			        <th>cityId</th>
+			        <th>cityName</th>
+			        <th>district</th>
+			        <th>population</th>
+			        <th>dateModified</th>
+			        <th>dateCreated</th>
+			        <th>操作</th>
+			      </tr>
+			    </thead>
+			    <tbody>
+	 
+	 		      <tr th:each="city:${pageData.cities}" th:object="${city}">
+			        <td th:text="*{cityId}"></td>
+			        <td th:text="*{cityName}"></td>
+			        <td th:text="*{district}"></td>
+			        <td th:text="*{population}"></td> 
+			        <td th:text="${#dates.format(city.dateModified,'yyyy-MM-dd hh:mm:ss')}"></td>
+			        <td th:text="${#dates.format(city.dateCreated,'yyyy-MM-dd hh:mm:ss')}"></td>
+			        <td> 
+			            <button type="button" class="btn btn-danger del"  th:onclick="|javascript:del(*{cityId})|">删除</button>
+			            <button type="button" class="btn btn-secondary up"   name="updateBtn" th:onclick="|javascript:update(*{cityId})|">编辑</button> 
+			        </td>
+			      </tr>
+			    </tbody>
+	         </table>
+	     <!-- 分页组件 -->
+					<ul class="pagination">
+					    <input type="hidden" th:value="${pageData.totalPage}" id="inpIds"/>
+						<li class="page-item"><a class="page-link" th:onclick="|javascript:fenye(${pageData.nowPage-1})|">Previous</a></li>
+						<li class="page-item"  th:each="i:${#numbers.sequence(1,pageData.totalPage)}" th:class="${pageData.nowPage==i}?'page-item active':'page-item'">
+						    <a class="page-link" th:onclick="|javascript:fenye(${i})|" th:if="${i le 10}">[[${i}]]</a>
+						</li>
+						<li class="page-item active" th:if="${pageData.nowPage gt 10}">
+						    <a class="page-link" th:onclick="|javascript:fenye(${pageData.nowPage})|">[[${pageData.nowPage}]]</a>
+						</li>
+						<li class="page-item"><a class="page-link" th:onclick="|javascript:fenye(${pageData.nowPage+1})|">Next</a></li>
+						<h4 class="text-success">当前页:第[[${pageData.nowPage}]]页       共[[${pageData.totalCount}]]条记录  共[[${pageData.totalPage}]]页</h4> 
+					</ul>
+			 </div>
+			 </div>
+     </div>
+<!-- 模态框 -->
+<div class="modal fade" id="modelId">
+  <div class="modal-dialog" >
+    <div class="modal-content">
+      <!-- 模态框头部 -->
+      <div class="modal-header">
+        <h4 class="modal-title">详细信息</h4> <span id="messageId" style="color:red"></span>
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+      </div>
+      
+      <!-- 模态框主体 -->
+      <div class="modal-body" id="formDivId">
+				
+      </div>
+      <!-- 模态框底部 -->
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+        <button type="button" class="btn btn-secondary" onclick="sure()">确定提交</button>
+      </div>
+    </div>
+  </div>
+</div>  
+<div th:include="~{fragments/footer::footer}"></div>
+<!--  -->
+</body>
+</html>
+
+
+<script type="text/javascript">
+		    var pagetotal=$("#inpIds").val();
+	        var pageSize=10;   //设置每页显示的个数
+	        var sort="DESC";//默认的排序规则
+	        var countryId=$("#countryId").val();
+	        $(document).ready(function(){
+	        	 countryId=$("#countryIds").val();
+	        	 pagetotal=$("#inpIds").val();
+	        	  /////搜索的实现
+			     $(document).on("click","#searchbtnId",function(){
+			    	 getData(1,pageSize);
+			     })
+			     
+			     $(document).on("keyup","#searchIds",function(){
+			    	 var keyword=$("#searchIds").val();
+                     $.ajax({
+                    	 url:'/word?keyword='+keyword,
+                    	 success:function(data){
+                    		 $("#searchIds").val(data.message);
+                    		 if(data.message.indexOf("*")!=-1){
+                    			 $('#searchbtnId').prop('disabled', true); // 按钮灰掉且不可点击。 
+                    		 }else{
+                    			 $('#searchbtnId').prop('disabled', false); // 按钮灰掉且不可点击。 
+                    		 }
+                    	 },
+                    	 error:function(){
+                    		 alert("失败了");
+                    	 }
+                     });			    	 
+			     })
+	        });
+	        
+		     ////////////////分页的实现
+		    function fenye(index){
+		    	 pagetotal=$("#inpIds").val();
+		    	 if(index>=1&&index<=pagetotal){
+		    		  getData(index,pageSize);
+		    	 }
+		    }
+		     
+		     function getData(index,pageSize){
+		    	 var keyword=$("#searchIds").val();//获取到关键字
+		    	 $.ajax({
+	        		   url:'/city/'+countryId,
+	        		   type:'GET',
+	        		   data:{
+	        			   nowPage:index,
+	        			   pageSize:pageSize,
+	        			   keyword:keyword,
+	        			   sort:sort,
+	        			   async:false,
+	        			},
+	        		   success:function(data){
+	        			   $("#replacecontainerId").html(data);
+	        		   },
+	        		   error:function(){
+	        			   alert("error");
+	        		   }
+	        	   })
+		     }
+		     function del(cityId){
+		    	 if(confirm("确定删除？")){
+		    		 $.ajax({
+		        		   url:'/city/'+cityId,
+		        		   type:"delete",
+		        		   dataType:'json',
+		        		   success:function(data){
+		        			   if(data){
+		        				   alert("删除成功！！！");
+		        			   }else{
+		        				   alert("删除失败，请稍后重试！！！");
+		        			   }
+		        			   getData(1,pageSize);//刷新
+		        		   },
+		        		   error:function(){
+		        			   alert("error");
+		        		   }
+		        	   })
+		    	 } 
+		     }
+
+		     //刷新
+		     function flush(){
+		    	   $("#searchIds").val("");
+		    	   getData(1,pageSize);
+		     }
+		     
+		     
+		     //显示修改界面修改
+		     function update(cityId){
+		    	    //根据id获取数据
+		    	    $.ajax({
+		    		   url:'/city/edit?cityId='+cityId,
+		    		   type:'get',
+		    		   success:function(data){
+		    			   $("#formDivId").html(data);
+		    			   $("#modelId").modal();
+		    			   //alert(data);
+		    		   },
+		    		   error:function(){
+		    			   alert("失败了");
+		    		   }
+		    	   });
+		     }
+		     
+		     
+		     //确认修改的表单的提交
+		     function sure(){
+		    	 var form=$("#formId").serialize();
+		    	 $.ajax({
+		    		 url:'/city/add',
+		    		 type:'POST',
+		    		 dataType:'JSON',
+		    		 data:form,
+		             success: function (res) {
+                                 if(res.flag){
+                                     $('#modelId').modal('hide');
+                                	 alert(res.message);
+                                     flush();
+                                 }else{
+                                	 $("#messageId").text(res.message);
+                                 }                    
+		             },
+		             error:function(){
+		            	 alert("失败了");
+		             }
+		    	 })
+		     }
+		     
+		     
+		     //显示出增加表单
+		     function add(){
+		    	    //根据id获取数据
+		    	    $.ajax({
+		    		   url:'/city/add',
+		    		   type:'get',
+		    		   success:function(data){
+		    			   $("#formDivId").html(data);
+		    			   $("#modelId").modal();
+		    			   //alert(data);
+		    		   },
+		    		   error:function(){
+		    			   alert("失败了");
+		    		   }
+		    	   });
+
+		     }
+		     
+		     ////人口的排序。。默认是降序的
+		     $(document).on("click","#sortId",function(){
+		    	   var tempsort=sort;
+		    	   if(tempsort=='DESC'){
+		    		   sort="ASC";
+				       getData(1,pageSize);
+		    	   }
+		    	   if(tempsort=='ASC'){
+		    		   sort="DESC";
+				       getData(1,pageSize);
+		    	   } 
+		     });
+</script>

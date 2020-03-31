@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zp.repository.UserMapper">
+    <resultMap type="com.zp.modules.account.entity.User" id="BaseResultMap">
+        <id column="user_id" property="userId"/>
+        <result column="user_name" property="userName"/>
+        <result column="password" property="password"/>
+        <result column="create_date" property="createDate"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+       user_id,user_name,password,create_date       
+    </sql>
+    <!-- 查询所有的user -->
+    <select id="selAll" resultMap="BaseResultMap">
+            select 
+            <include refid="Base_Column_List"></include>              
+            from m_user
+    </select>
+    
+    <!--根据user查询users -->
+    <select id="selUserByUserName" resultMap="BaseResultMap">
+        select 
+        <include refid="Base_Column_List"/>
+        from m_user
+        where 
+        user_name=#{userName}
+    </select>
+    
+    <!-- 插入User -->
+    <insert id="insUserByUser">
+        insert into m_user
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+	         <if test="userName !=null and userName!=''">
+	            user_name,
+	         </if>
+	         <if test="password !=null and password!=''">
+	            password,
+	         </if>
+	         <if test="createDate !=null">
+	            create_date,
+	         </if>
+        </trim>
+        <trim prefix="values(" suffix=")" suffixOverrides=",">
+	         <if test="userName !=null and userName!=''">
+	            #{userName},
+	         </if>
+	         <if test="password !=null and password!=''">
+	            #{password},
+	         </if>
+	         <if test="createDate !=null">
+	            #{createDate},
+	         </if>
+        </trim>
+    </insert>
+</mapper>

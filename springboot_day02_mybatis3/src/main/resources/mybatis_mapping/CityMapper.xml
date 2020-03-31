@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zp.repository.CityMapper">
+  <resultMap id="BaseResultMap" type="com.zp.pojo.City">
+    <id column="city_id" jdbcType="INTEGER" property="cityId" />
+    <result column="city_name" jdbcType="VARCHAR" property="cityName" />
+    <result column="local_city_name" jdbcType="VARCHAR" property="localCityName" />
+    <result column="country_id" jdbcType="INTEGER" property="countryId" />
+    <result column="district" jdbcType="VARCHAR" property="district" />
+    <result column="population" jdbcType="INTEGER" property="population" />
+    <result column="date_modified" jdbcType="TIMESTAMP" property="dateModified" />
+    <result column="date_created" jdbcType="TIMESTAMP" property="dateCreated" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    city_id, city_name, local_city_name, country_id, district, population, date_modified, 
+    date_created
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from m_city
+    where city_id = #{cityId,jdbcType=INTEGER}
+  </select>
+  
+  <select id="selCityByCountryId" resultType="city">
+      select
+     <include refid="Base_Column_List" />   
+     from m_city
+     where country_id=#{countryId} and (
+         m_city.city_name like #{keyword} 
+         or m_city.district like #{keyword} 
+         or m_city.local_city_name like #{keyword}
+     )
+     <if test="sort != null and sort != ''">
+        ORDER BY m_city.population ${sort}
+     </if>
+       limit #{startIndex},#{pageSize}
+  </select>
+  
+  <select id="selCountByCountryId" resultType="integer">
+     select count(city_id) from m_city where country_id=#{countryId} and (
+         m_city.city_name like #{keyword} 
+         or m_city.district like #{keyword} 
+         or m_city.local_city_name like #{keyword}
+     )
+  </select>
+  
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from m_city
+    where city_id = #{cityId,jdbcType=INTEGER}
+  </delete>
+  
+  <!-- 插入值  -->
+  <insert id="insert" parameterType="com.zp.pojo.City">
+    insert into m_city (city_id,city_name, local_city_name, 
+      country_id, district, population, 
+      date_modified, date_created)
+    values (default, #{cityName,jdbcType=VARCHAR}, #{localCityName,jdbcType=VARCHAR}, 
+      #{countryId,jdbcType=INTEGER}, #{district,jdbcType=VARCHAR}, #{population,jdbcType=INTEGER}, 
+      #{dateModified,jdbcType=TIMESTAMP}, #{dateCreated,jdbcType=TIMESTAMP})
+  </insert>
+  
+  <insert id="insertSelective" parameterType="com.zp.pojo.City">
+     insert into m_city
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="cityId != null">
+        city_id,
+      </if>
+      <if test="cityName != null and cityName !=''">
+        city_name,
+      </if>
+      <if test="localCityName != null and localCityName !='' ">
+        local_city_name,
+      </if>
+      <if test="countryId != null">
+        country_id,
+      </if>
+      <if test="district != null and district !=''">
+        district,
+      </if>
+      <if test="population != null and population !=''">
+        population,
+      </if>
+      <if test="dateModified != null">
+        date_modified,
+      </if>
+      <if test="dateCreated != null">
+        date_created,
+      </if>
+    </trim>
+    
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="cityId != null ">
+        #{cityId,jdbcType=INTEGER},
+      </if>
+      <if test="cityName != null and cityName !=''">
+        #{cityName,jdbcType=VARCHAR},
+      </if>
+      <if test="localCityName != null and localCityName !=''">
+        #{localCityName,jdbcType=VARCHAR},
+      </if>
+      <if test="countryId != null">
+        #{countryId,jdbcType=INTEGER},
+      </if>
+      <if test="district != null">
+        #{district,jdbcType=VARCHAR},
+      </if>
+      <if test="population != null">
+        #{population,jdbcType=INTEGER},
+      </if>
+      <if test="dateModified != null">
+        #{dateModified,jdbcType=TIMESTAMP},
+      </if>
+      <if test="dateCreated != null">
+        #{dateCreated,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  
+  
+  
+  
+  <update id="updateByPrimaryKeySelective" parameterType="com.zp.pojo.City">
+    update m_city
+    <set>
+      <if test="cityName != null and cityName !=''">
+        city_name = #{cityName,jdbcType=VARCHAR},
+      </if>
+      <if test="localCityName != null and localCityName !=''">
+        local_city_name = #{localCityName,jdbcType=VARCHAR},
+      </if>
+      <if test="countryId != null and countryId != ''">
+        country_id = #{countryId,jdbcType=INTEGER},
+      </if>
+      <if test="district != null and district !=''">
+        district = #{district,jdbcType=VARCHAR},
+      </if>
+      <if test="population != null and population !=''">
+        population = #{population,jdbcType=INTEGER},
+      </if>
+      <if test="dateModified != null">
+        date_modified = #{dateModified,jdbcType=TIMESTAMP},
+      </if>
+      <if test="dateCreated != null">
+        date_created = #{dateCreated,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where city_id = #{cityId,jdbcType=INTEGER}
+  </update>
+
+  <update id="updateByPrimaryKey" parameterType="com.zp.pojo.City">
+    update m_city
+    set city_name = #{cityName,jdbcType=VARCHAR},
+      local_city_name = #{localCityName,jdbcType=VARCHAR},
+      country_id = #{countryId,jdbcType=INTEGER},
+      district = #{district,jdbcType=VARCHAR},
+      population = #{population,jdbcType=INTEGER},
+      date_modified = #{dateModified,jdbcType=TIMESTAMP},
+      date_created = #{dateCreated,jdbcType=TIMESTAMP}
+    where city_id = #{cityId,jdbcType=INTEGER}
+  </update>
+</mapper>

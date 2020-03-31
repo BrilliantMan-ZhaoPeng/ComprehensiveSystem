@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head th:include="~{fragments/header::header}">
+<meta charset="UTF-8">
+<title>城市管理</title>
+</head>
+
+<body>
+        <!-- <div id="containerId"> -->
+         <div id="replacecontainerId">
+	        <div class="container" id="containerId">
+				  <h1 align="center">国家信息表</h1>
+				  <table class="table table-hover">
+				    <thead>
+				      <tr>
+				        <th>countryId</th>
+				        <th>countryName</th>
+				        <th>capital</th>
+				        <th>continent</th>
+				        <th>region</th>
+				        <th>population</th>
+				        <th>dateModified</th>
+				      </tr>
+				    </thead>
+				    <tbody>
+				      <tr name="tr" class="bb" th:each="country:${pageData.countrys}" th:object="${country}" th:countryId="${country.countryId}" 
+				      th:capitalCityName="${country.capitalCityName}"
+				      th:countryName="${country.countryName}">
+				        <td th:text="*{countryId}" id="countryId"></td>
+				        <td th:text="*{countryName}"></td>
+				        <td th:text="*{capitalCityName}"></td>
+				        <td th:text="*{continent}"></td>
+				        <td th:text="*{region}"></td> 
+				        <td th:text="*{population}"></td> 
+				        <td th:text="${#dates.format(country.dateModified,'yyyy-MM-dd hh:mm:ss')}"></td>
+				      </tr>
+				    </tbody>
+		         </table>
+				<div class="container">
+					<ul class="pagination">
+					     <input type="hidden" th:value="${pageData.totalPage}" id="inpId"/>
+						<li class="page-item"><a class="page-link" th:onclick="|javascript:fenye(${pageData.nowPage-1})|">Previous</a></li>
+						<li class="page-item" th:each="i:${#numbers.sequence(1,pageData.totalPage)}" th:class="${pageData.nowPage==i}?'page-item active':'page-item'">
+						    <a class="page-link" th:onclick="|javascript:fenye(${i})|">[[${i}]]</a>
+						</li>
+						<li class="page-item"><a class="page-link" th:onclick="|javascript:fenye(${pageData.nowPage+1})|">Next</a></li>
+					</ul>
+				</div>
+			</div>
+		  </div>
+		<!--  -->
+</body>
+<div th:include="~{fragments/footer::footer}"></div>
+</html>
+
+<script type="text/javascript">
+                 var pagetotal=$("#inpId").val();//获得总页数
+    			 var pagesize=2;   //设置每页显示的个数
+                 function fenye(index){
+      				 if(index>=1&&index<=pagetotal){
+      					 $.ajax({
+      						   url:"/country?nowPage="+index+"&pageSize="+pagesize+"&async="+false,
+      						   success:function(data){
+      							  $("#replacecontainerId").html(data);
+      						   },
+      						   error:function(){
+      							   alert("error");
+      						   }
+      				      })
+      				 }
+      			   }
+
+    			 ////跳转到相应的城市界面中去
+                 $(document).on("click",'.bb',function () {
+    			           var countryId=$(this).attr("countryId");
+    				   	   window.location.href="city/"+countryId;
+    			    })
+       </script>

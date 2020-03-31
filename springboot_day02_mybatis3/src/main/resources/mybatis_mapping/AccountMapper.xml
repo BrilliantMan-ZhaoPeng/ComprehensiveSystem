@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zp.modules.account.repository.AccountRepository">
+    <resultMap type="com.zp.modules.account.entity.User" id="BaseResultMap">
+        <id column="user_id" property="userId"/>
+        <result column="user_name" property="userName"/>
+        <result column="password" property="password"/>
+        <result column="create_date" property="createDate"/>
+         <result column="remove_state" property="removeState"/>
+        <collection property="roles" resultMap="RoleListResultMap"/>
+    </resultMap>
+    <resultMap type="com.zp.modules.account.entity.Role" id="RoleListResultMap">
+         <id column="role_id" property="roleId"/>  
+         <result column="role_name" property="roleName"/>
+    </resultMap>
+    
+   <resultMap  type="com.zp.modules.account.entity.Role" id="RoleBaseResultMap">
+       <id column="role_id" property="roleId"/>
+       <result column="role_name" property="roleName"/>
+       <collection property="resources" resultMap="resourceMap"/>
+    </resultMap>
+    <resultMap type="com.zp.modules.account.entity.Resource"  id="resourceMap">
+       <id column="resource_id" property="resourceId"/>    
+       <result column="resource_name" property="resourceName"/>
+       <result column="resource_uri" property="resourceUri"/>
+    </resultMap>
+    
+    <select id="selAllUser" resultMap="BaseResultMap">
+	    SELECT
+		m_user.user_id,
+		m_user.create_date,
+		m_user.`password`,
+		m_user.remove_state,
+		m_user.user_name,
+		m_role.role_id,
+		m_role.role_name
+		FROM
+		m_user
+		left JOIN m_user_role ON m_user_role.user_id = m_user.user_id
+	    left JOIN m_role ON m_user_role.role_id = m_role.role_id
+    </select>
+
+
+    <select id="selUserByUserId" resultMap="BaseResultMap">
+        SELECT
+		m_user.user_id,
+		m_user.create_date,
+		m_user.`password`,
+	    m_user.remove_state,
+		m_user.user_name,
+		m_role.role_id,
+		m_role.role_name
+		FROM
+		m_user
+		left JOIN m_user_role ON m_user_role.user_id = m_user.user_id
+		left JOIN m_role ON m_user_role.role_id = m_role.role_id
+		where m_user.user_id=#{userId}
+    </select>
+    
+    <update id="upUser">
+         update m_user
+         <set>
+            <if test="userName!=null and userName!='' ">
+                 user_name=#{userName},
+            </if>  
+            <if test="password!=null and password!='' ">
+                password=#{password}
+            </if>  
+            <if test="removeState!=null and removeState!='' ">
+                remove_state=#{removeState}
+            </if>
+         </set> 
+         where user_id=#{userId}
+    </update>
+    
+    
+    
+    <select id="selAllRoles" resultMap="RoleBaseResultMap">
+       select m_role.role_id,m_role.role_name,m_resource.resource_id,m_resource.resource_name,m_resource.resource_uri 
+       from m_role LEFT JOIN m_role_resource on m_role.role_id=m_role_resource.role_id 
+       LEFT JOIN m_resource on m_resource.resource_id=m_role_resource.resource_id
+    </select>
+    
+     <select id="selRoleById" resultMap="RoleBaseResultMap">
+       select m_role.role_id,m_role.role_name,m_resource.resource_id,m_resource.resource_name,m_resource.resource_uri 
+       from m_role LEFT JOIN m_role_resource on m_role.role_id=m_role_resource.role_id 
+       LEFT JOIN m_resource on m_resource.resource_id=m_role_resource.resource_id
+       where m_role.role_id=#{id}
+    </select>
+</mapper>

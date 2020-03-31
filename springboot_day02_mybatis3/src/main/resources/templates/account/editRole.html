@@ -1,0 +1,17 @@
+<form role="form" id="formDataId">
+          <input type="hidden" th:value="${role.roleId}" id="roleId"/>
+           <input type="hidden" th:value="${role.roleName}" id="oldRoleName"/>
+		  <div class="form-group" id="sureLabel">
+		    <label for="name">roleName</label><span id="roleSpan"></span>
+		    <input type="text" class="form-control"  id="roleName" th:value="${role.roleName}" placeholder="请输入名称"/>
+		  </div>
+		  <div class="radio">
+               <h4>resources</h4>
+	             <label class="radio-inline"  th:each="resource:${role.resources}"><!-- 这里是遍历系统中所有的roles -->
+	                  <input type="checkbox" name="roles" th:value="${resource.resourceId}" th:text="${resource.resourceName}" checked="checked"/>
+	             </label>
+	             <label class="radio-inline"  th:each="resource:${allResource}"><!-- 这里是遍历系统中所有的roles -->
+	                  <input type="checkbox" name="roles" th:value="${resource.resourceId}" th:text="${resource.resourceName}"/>
+	            </label>
+		 </div>
+</form>

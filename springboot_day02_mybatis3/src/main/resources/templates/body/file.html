@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+<head th:include="~{fragments/header::header}">
+<meta charset="UTF-8">
+<title>文件管理</title>
+</head>
+<body>
+      <h1 align="center" style="color:green">文件上传下载详细信息表
+      <button type="button" class="btn btn-success" id="startId">开始上传</button>
+   </h1>
+  <div id="replaceId">
+  <div class="container" id="maincontainerId">
+   <table class="table table-hover">
+	<thead>
+		<tr>
+			<th>Id</th>
+			<th>Name</th>
+			<th>Description</th>
+			<th>Size</th>
+			<th>Address</th>
+			<th>CreateTime</th>
+			<th>UploadCount</th>
+			<th>操作</th>
+		</tr>
+	</thead>
+	<tbody>
+ 		<tr th:each="data:${pageData.datas}" th:object="${data}">  
+ 		     <td>[[*{fileId}]]</td>
+ 		     <td id="fileNameId">[[*{fileName}]]</td>
+ 		     <td>[[*{fileDescription}]]</td>
+ 		     <td>[[*{fileSize}]]KB</td>
+ 		     <td id="fileUrlId">[[*{fileUrl}]]</td>
+ 		     <td th:text="${#dates.format(data.createTime,'yyyy-MM-dd hh:mm')}"></td>
+ 		     <td>[[*{uploadCount}]]</td>
+ 		     <td>
+ 		     <a class="btn btn-info" th:href="@{'file/download?fileId='+${data.fileId}+'&fileName='+${data.fileName}}">下载</a>
+ 		     </td>
+		</tr>
+	</tbody>
+</table>
+
+    <!-- 分页的组件 -->
+    <ul class="pagination">
+	    <input type="hidden" th:value="${pageData.totalPage}" id="inpId"/>
+		<li class="page-item"><a class="page-link" th:onclick="|javascript:fenye(${pageData.nowPage-1})|">Previous</a></li>
+		<li class="page-item" th:each="i:${#numbers.sequence(1,pageData.totalPage)}" th:class="${pageData.nowPage==i}?'page-item active':'page-item'">
+		    <a class="page-link" th:onclick="|javascript:fenye(${i})|">[[${i}]]</a>
+		</li>
+		<li class="page-item"><a class="page-link" th:onclick="|javascript:fenye(${pageData.nowPage+1})|">Next</a></li>
+		<h4 class="text-success">当前页:第[[${pageData.nowPage}]]页       共[[${pageData.totalCount}]]条记录  共[[${pageData.totalPage}]]页</h4> 
+	</ul>
+</div>
+</div>
+
+
+<!-- 模态框（Modal） -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+			    <h4 style="color:red" id="messageId"></h4>
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+					&times;
+				</button>
+			</div>
+			<div class="modal-body">
+			   <!--文件上传组件 -->
+						<div class="container">
+							  <h2>文件上传</h2>
+							  <form  method="post"  id="formId" enctype="multipart/form-data">
+							    <div class="custom-file mb-3 col-sm-12">
+							      <input type="file" class="custom-file-input col-sm-5" id="1" name="file">
+							      <label class="custom-file-label" for="customFile" id="fileMessageId1" name="messageName">选择文件</label>
+						       </div>
+						       <div class="custom-file mb-3 col-sm-12">
+							      <input type="file" class="custom-file-input col-sm-5" id="2" name="file">
+							      <label class="custom-file-label" for="customFile" id="fileMessageId2" name="messageName">选择文件</label>
+						       </div>
+						       <div class="form-group">
+								  <label for="comment">文件描述:</label>
+								  <textarea class="form-control" rows="5" id="descriptionId" name="description" placeholder="长度为1~300"></textarea>
+								</div>
+							  </form>
+						</div> 
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">关闭
+				</button>
+				<button type="button" class="btn btn-default"  id="resetId">重新选择
+				</button>
+				<button type="button" class="btn btn-primary" id="sureId">
+					确认上传
+				</button>
+			</div>
+		</div><!-- /.modal-content -->
+	</div><!-- /.modal -->
+</div>
+
+
+   <!--  -->
+<div th:include="~{fragments/footer::footer}"></div>
+</body>
+</html>
+<script type="text/javascript">
+////////////////分页的实现
+var pageSize=5;
+function fenye(index){
+	 var pagetotal=$("#inpId").val();
+	 if(index>=1&&index<=pagetotal){
+		  getData(index,pageSize);
+	 }
+}
+
+ function getData(index,pageSize){
+	 //var keyword=$("#searchIds").val();//获取到关键字
+	 $.ajax({
+		   url:'/file',
+		   type:'GET',
+		   data:{
+			   nowPage:index,
+			   pageSize:pageSize,
+		//	   keyword:keyword,
+			//   sort:sort,
+			   async:false,
+			},
+		   success:function(data){
+			   $("#replaceId").html(data);
+		   },
+		   error:function(){
+			   alert("error");
+		   }
+	   })
+ }
+ 
+ 
+    
+   $(document).ready(function(){
+    	$("[name=file]").click(function(){
+	       		 var id=$(this).attr("id");
+    		     $(this).change(function(){
+		    		 var file=$(this)[0].files[0];//获取文件
+		       		 var fileName=file.name;//文件名
+		       		 var fileSize=parseInt(file.size)/1024;//文件大小
+		       		 var fileType=file.type;//文件类型
+		       		 $("#fileMessageId"+id).text("文件大小:"+fileSize+"KB   文件类型:"+fileType+"  文件名:"+fileName);
+    		     });
+    	})
+        
+    	//显示模态框
+        $("#startId").click(function(){
+        	  $("#myModal").modal();
+    	});
+
+    	
+    	//重置表单的实现
+    	$("#resetId").click(function(){
+    		$('input[type="file"]').val('');
+    		$("[name=messageName]").text("选择文件");
+    		
+    	}) 
+    	
+    	//确认上传
+        $("#sureId").click(function(){
+    		var description=$("#descriptionId").val();
+    		if(description.length>100||description.length==0){
+				$("#messageId").text("请写入标准的描述信息");
+			}else{
+				  var formData = new FormData($("#formId")[0]);//封装表单对象
+	           	  $.ajax({
+	           		  url:'file/upload',
+	           		  data:formData,
+	           		  type:'POST',
+	           		  processData: false,// 不加会报错
+	                  contentType: false,// 不加会报错
+	           		  success:function(data){
+	           			  if(data.flag){
+	           				  alert(data.message);
+	           				  window.location.reload();
+	           			  }else{
+	           				 $("#messageId").text(data.message);
+	           			  }
+	           		  },
+	           		  error:function(){
+	           			  alert("error");
+	           		  }
+	           	  })
+			}
+    		/*
+    		var file=$("#customFile")[0].files[0];
+    		if(file==null){
+    			 $("#messageId").text("请选择要上传的文件");
+    		}else{
+    		} */
+    	});
+})
+</script>

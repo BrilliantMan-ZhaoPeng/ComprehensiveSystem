@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head th:include="~{account/fragments/header::header}">
+   
+</head>
+<body>
+<div class="container">
+  <h2>Register</h2>
+  <form method="post">
+    <div class="form-group" id="usernameLabel">
+      <label >用户名:</label><span id="usernameSpan" style="color:red"></span>
+      <input class="form-control" id="usernameId" placeholder="Enter Username">
+    </div>
+    <div class="form-group" id="pwdLabel">
+      <label for="pwd">密码:</label><span id="pwdSpan" style="color:red"></span>
+      <input type="password" class="form-control" id="pwdIds" placeholder="Enter password">
+    </div>
+    <div class="form-group" id="sureLabel">
+      <label for="pwd">确认密码:</label><span id="repwdSpan" style="color:red"></span>
+      <input type="password" class="form-control" id="repwdIds" placeholder="Enter password">
+    </div>
+    <button type="submit" class="btn btn-primary" disabled="disabled" id="btnId">提交</button>
+    <button type="reset" class="btn btn-primary" id="resetId">重置</button>
+  </form>
+</div>
+</body>
+</html>
+<script type="text/javascript">
+   var username;
+   var password;
+   var repassword;
+   var a=0;
+   var b=0;
+   var c=0;
+   //输入用户名校验
+   $(document).on("keyup","#usernameId",function(){
+	   $("#btnId").attr("disabled","disabled");
+	   username=$("#usernameId").val();
+	 //用户名正则，4到16位（字母，数字，下划线，减号）
+	   var uPattern = /^[a-zA-Z0-9_-]{4,16}$/;
+	   if(!uPattern.test(username)){
+		   $("#usernameLabel").attr("class","form-group has-error");
+		   $("#usernameSpan").attr("style","color:red");
+		   $("#usernameSpan").text("请输入4到16位（字母，数字，下划线，减号）");
+	   }else{
+		   //验证用户名是否在数据库中已经存在
+		   $.ajax({
+			   url:'/shiro/check',
+			   type:'get',
+			   data:{
+				   'userName':username,
+			   },
+			   dataType:'json',
+			   success:function(data){
+				   if(data){
+					   $("#usernameLabel").attr("class","form-group has-error");
+					   $("#usernameSpan").attr("style","color:red");
+					   $("#usernameSpan").text("该用户名已存在");
+				   }else{
+					   $("#usernameLabel").attr("class","form-group has-success");
+					   $("#usernameSpan").text("验证通过");
+					   $("#usernameSpan").attr("style","color:green");
+					   a=1;
+					   if(b==1&&c==1){
+						   $("#btnId").removeAttr("disabled");
+					   }
+				   }
+			   },
+			   error:function(){
+				   alert("失败了");
+			   }
+		   })
+	   }
+   })
+   
+   //输入密码验证
+   $(document).on("keyup","#pwdIds",function(){
+	   $("#btnId").attr("disabled","disabled");
+	   password=$(this).val();
+	   var reg = /^(\w){6,20}$/;
+	  if(!reg.test(password)){
+		   $("#pwdLabel").attr("class","form-group has-error");
+		   $("#pwdSpan").text("只能输入6-20个字母、数字、下划线  ");
+		   $("#pwdSpan").attr("style","color:red");
+	  }else{
+		   $("#pwdLabel").attr("class","form-group has-success");
+		   $("#pwdSpan").text("验证通过");
+		   $("#pwdSpan").attr("style","color:green");
+		   b=1;
+		   if(a==1&&c==1){
+			   $("#btnId").removeAttr("disabled");
+		   }
+	  }
+   })
+   
+   //输入重复密码验证
+   $(document).on("keyup","#repwdIds",function(){
+	     $("#btnId").attr("disabled","disabled");
+	     repassword=$(this).val();
+	    if(repassword!=password){
+           $("#sureLabel").attr("class","form-group has-error");
+           $("#repwdSpan").text("两次密码不一致");
+           $("#repwdSpan").attr("style","color:red");
+	    }else{
+	    	   $("#sureLabel").attr("class","form-group has-success");
+	           $("#repwdSpan").text("验证通过");
+	           $("#repwdSpan").attr("style","color:green");
+	           c=1;
+	           if(a==1&&b==1){
+	        	   $("#btnId").removeAttr("disabled");
+			   }
+	    }
+   })
+   
+   
+   ////重置按钮
+   $(document).on("click","#resetId",function(){
+	   $("#repwdIds").val("");
+	   $("#pwdIds").val("");
+	   $("#usernameId").val("");
+	   
+	     
+	   $("#pwdLabel").attr("class","form-group");
+	   $("#usernameLabel").attr("class","form-group");
+	   $("#sureLabel").attr("class","form-group");
+	   
+	   $("#repwdSpan").text("");
+	   $("#pwdSpan").text("");
+	   $("#usernameSpan").text("");
+   })
+   
+   
+   //提交表单
+   $("#btnId").click(function(){
+	   $.ajax({
+		   url:'/shiro/doRegister',
+		   type:'post',
+		   dataType:'JSON',
+		   data:{
+			    'userName':username,
+			    'password':password,
+		   },
+		   success:function(data){
+			   if(data.flag){//增加成功
+				   alert("注册成功，请登录！！！");
+			       window.location.href="/shiro/login";
+			   }else{//增加失败
+				   alert(data.message);
+				   window.location.href="/shiro/register";
+			   }
+		   },
+		   error:function(){
+			   alert("失败了");
+		   }
+	   })
+   })
+</script>

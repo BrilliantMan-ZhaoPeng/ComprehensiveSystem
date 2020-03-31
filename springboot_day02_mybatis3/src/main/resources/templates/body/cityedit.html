@@ -1,0 +1,31 @@
+     <form id="formId" th:if="${modelData.cityVo != null}" th:object="${modelData.cityVo}"> 
+                   <input type="hidden" name="dateCreated" th:value="*{city.dateCreated}">
+				  <input type="hidden" name="cityId" th:value="*{city.cityId}">
+				  <div class="form-group">
+				    <label for="email">cityName:</label>
+				    <input type="text" class="form-control" name="cityName" th:value="*{city.cityName}"/>
+				  </div>
+				  <div class="form-group">
+				    <label for="pwd">district:</label>
+				    <input type="text" class="form-control" name="district" th:value="*{city.district}">
+				  </div>
+				  <div class="form-group">
+				    <label for="pwd">population:</label>
+				    <input type="text" class="form-control" name="population" th:value="*{city.population}">
+				  </div>
+				    <div class="form-group">
+				    <label for="pwd">localCityName:</label>
+				    <input type="text" class="form-control" name="localCityName" th:value="*{city.localCityName}">
+				  </div>
+				  </div>
+				    <div class="form-group">
+				    <label for="pwd">CountryName:</label>
+				    <select name="countryId">
+				       <option th:each="country:*{countrys}" th:object="${country}" 
+				       th:value="*{countryId}"
+				       th:selected="${modelData.cityVo.city.countryId eq country.countryId}?'true':'false'">
+				          [[*{countryName}]]     
+				       </option>
+				    </select>
+				  </div>
+	  </form>

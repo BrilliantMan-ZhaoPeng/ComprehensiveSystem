@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html th:fragment="header" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <meta charset="utf-8">
+    <title>Bootstrap 实例 - 倒置的导航栏</title>
+    <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+<body>
+<nav class="navbar navbar-inverse" role="navigation">
+    <div class="container-fluid">
+    <div class="navbar-header">
+        <a class="navbar-brand" href="/shiro">首页</a>
+    </div>
+    <div>
+        <!-- 游客登录的 -->
+        <ul class="nav navbar-nav">
+	            <li class="nav_item"><a href="#">网站介绍</a></li>
+	            <li class="nav_item"><a href="#">作者介绍</a></li>
+        </ul>
+        
+         <!-- admin角色的 -->
+        <ul class="nav navbar-nav" shiro:hasRole="admin">
+             <li class="nav-item">
+ 		         <a class="nav-link" href="/shiro/users" id="countryId">用户管理</a>
+		     </li>
+		     <li class="nav-item">
+		         <a class="nav-link" href="/shiro/roles" id="fileId">角色管理</a>
+		     </li>
+		     <li class="nav-item">
+		         <a class="nav-link" href="/shiro/resource" id="fileId">资源管理</a>
+		     </li>
+        </ul>
+        
+        <!-- admin或manager角色能访问的 -->
+        <ul class="nav navbar-nav" shiro:hasAnyRoles="admin,manager">
+            <li class="nav-item">
+		      <a class="nav-link" href="#" id="excelId">manager能访问1</a>
+		    </li>
+		    <li class="nav-item">
+		      <a class="nav-link" href="#" id="userId">manager能访问2</a>
+		    </li>
+        </ul>
+        
+               <!-- admin或manager或stuff角色能访问的 -->
+        <ul class="nav navbar-nav" shiro:hasAnyRoles="admin,manager,staff">
+            <li class="nav-item">
+		      <a class="nav-link" href="#" id="excelId">staff能访问1</a>
+		    </li>
+		    <li class="nav-item">
+		      <a class="nav-link" href="#" id="userId">staff能访问2</a>
+		    </li>
+        </ul>
+        
+        
+        <!--用户个人设置  -->
+        <ul class="nav navbar-nav navbar-right" >
+               <li class="dropdown" shiro:user=""> 
+                <a href="/shiro/register"  class="dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-user"><shiro:principal/><b class="caret"></b></span></a>
+                <ul class="dropdown-menu"> 
+                    <li><a href="/shiro/logout">个人信息</a></li> 
+                    <li><a href="/shiro/logout">个人设置</a></li> 
+                    <li><a href="/shiro/logout">注销</a></li> 
+                </ul> 
+               </li> 
+          <shiro:guest>
+              <li><a href="/shiro/register"><span class="glyphicon glyphicon-user"></span> 注册</a></li>
+              <li><a href="/shiro/login"><span class="glyphicon glyphicon-log-in"></span> 登录</a></li>
+          </shiro:guest>
+          <li shiro:authenticated=""><a href="/shiro/logout"><span class="glyphicon glyphicon-log-in"></span>  注销</a></li>
+        </ul>
+    </div>
+    </div>
+</nav>
+</body>
+</html>

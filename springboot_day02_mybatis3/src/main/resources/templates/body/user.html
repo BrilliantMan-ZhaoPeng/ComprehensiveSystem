@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head th:include="~{fragments/header::header}">
+<meta charset="UTF-8">
+<title>用户列表</title>
+</head>
+<body>
+<div class="container">
+   <h3 class="text-center font-weight-bold" style="color:green">Excel表格管理</h3>
+   <table class="table table-hover">
+	<thead>
+		<tr>
+			<th>userId</th>
+			<th>userName</th>
+			<th>password</th>
+			<th>createDate</th>
+  			<th>
+  			  <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal">导入</button>
+  			   <a type="button" class="btn btn-dark" href="/excel/export">导出</a>
+			</th>
+		</tr>
+	</thead>
+	<tbody>
+ 		<tr th:each="user:${userModel.users}" th:object="${user}" th:if="${userModel.users.size() gt 0}">  
+ 		     <td>[[*{userId}]]</td>
+ 		     <td >[[*{userName}]]</td>
+ 		     <td >[[*{password}]]</td>
+ 		     <td th:text="${#dates.format(user.createDate,'yyyy-MM-dd hh:mm')}"></td>
+		</tr>
+		<tr th:if="${userModel.users.size() eq 0}">
+		          暂无数据
+	    </tr>	
+	</tbody>
+</table>
+
+<!-- 模态框 -->
+<div class="modal fade" id="myModal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+ 
+      <!-- 模态框头部 -->
+      <div class="modal-header">
+        <h4 class="modal-title">文件选择</h4>
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+      </div>
+ 
+      <!-- 模态框主体 -->
+      <div class="modal-body">
+	      <section>
+					<form action="/excel/import" method="post" enctype="multipart/form-data" id="formId">
+						<input type="file" name="excelFile" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel">
+						<button class="btn btn-secondary" id="submitbtn">上传</button>
+					</form>
+					<p>==================================================================</p>
+	       </section>
+      </div>
+ 
+      <!-- 模态框底部 -->
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+      </div>
+ 
+    </div>
+  </div>
+</div>
+
+</div>
+</body>
+<div th:include="~{fragments/footer::footer}"></div>
+</html>
+
+<script type="text/javascript">
+<!--
+
+//-->
+$("#submitbtn").on("click",function(){
+ 	var formData = new FormData($("#formId")[0]);
+	$.ajax({
+	    type: "POST",
+	    dataType:'JSON',
+	    url: "/excel/import",
+	    data: formData,
+	    processData: false,// 不加会报错
+	    contentType: false,// 不加会报错
+	    success: function (res) {
+	    	if(res.flag){
+	    		alert("上传成功，未成功名单已自动下载，请自行查看名单");
+	    	}else{
+	    		alert("上传失败，选择为空");
+	    	}
+	    },
+	    error:function(){
+	    	  alert("失败了");
+	    }
+	});
+})
+
+</script>

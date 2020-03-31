@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zp.repository.UploadFileMapper">
+  <resultMap id="BaseResultMap" type="com.zp.pojo.UploadFile">
+    <id column="file_id" jdbcType="INTEGER" property="fileId" />
+    <result column="file_name" jdbcType="CHAR" property="fileName" />
+    <result column="file_description" jdbcType="VARCHAR" property="fileDescription" />
+    <result column="file_size" jdbcType="VARCHAR" property="fileSize" />
+    <result column="file_url" jdbcType="VARCHAR" property="fileUrl" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="upload_count" jdbcType="INTEGER" property="uploadCount" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    file_id, file_name, file_description, file_size, file_url, create_time, upload_count
+  </sql>
+
+  <select id="selAll" resultMap="BaseResultMap">
+       select
+      <include refid="Base_Column_List"></include>
+       from m_file limit #{startIndex},#{pageSize}
+  </select>
+  
+   <select id="selFileCount" resultType="integer">
+       select count(file_id) from m_file
+  </select>
+ 
+  
+   <select id="selFileByName" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from m_file
+    where file_name = #{fileName}
+  </select>
+  
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from m_file
+    where file_id = #{fileId,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from m_file
+    where file_id = #{fileId,jdbcType=INTEGER}
+  </delete>
+  
+  <insert id="insert" parameterType="com.zp.pojo.UploadFile">
+    insert into m_file (file_id, file_name, file_description, 
+      file_size, file_url, create_time, 
+      upload_count)
+    values (#{fileId,jdbcType=INTEGER}, #{fileName,jdbcType=CHAR}, #{fileDescription,jdbcType=VARCHAR}, 
+      #{fileSize,jdbcType=INTEGER}, #{fileUrl,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}, 
+      #{uploadCount,jdbcType=INTEGER})
+  </insert>
+
+  
+  <insert id="insertSelective" parameterType="com.zp.pojo.UploadFile">
+    insert into m_file
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="fileId != null">
+        file_id,
+      </if>
+      <if test="fileName != null">
+        file_name,
+      </if>
+      <if test="fileDescription != null">
+        file_description,
+      </if>
+      <if test="fileSize != null">
+        file_size,
+      </if>
+      <if test="fileUrl != null">
+        file_url,
+      </if>
+      <if test="createTime != null">
+        create_time,
+      </if>
+      <if test="uploadCount != null">
+        upload_count,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="fileId != null">
+        #{fileId,jdbcType=INTEGER},
+      </if>
+      <if test="fileName != null">
+        #{fileName,jdbcType=CHAR},
+      </if>
+      <if test="fileDescription != null">
+        #{fileDescription,jdbcType=VARCHAR},
+      </if>
+      <if test="fileSize != null">
+        #{fileSize},
+      </if>
+      <if test="fileUrl != null">
+        #{fileUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="uploadCount != null">
+        #{uploadCount,jdbcType=INTEGER},
+      </if>
+    </trim>
+  </insert>
+  
+  <update id="updateByPrimaryKeySelective" parameterType="com.zp.pojo.UploadFile">
+    update m_file
+    <set>
+      <if test="fileName != null">
+        file_name = #{fileName},
+      </if>
+      <if test="fileDescription != null">
+        file_description = #{fileDescription},
+      </if>
+      <if test="fileSize != null">
+        file_size = #{fileSize},
+      </if>
+      <if test="fileUrl != null">
+        file_url = #{fileUrl},
+      </if>
+      <if test="createTime != null">
+        create_time = #{createTime},
+      </if>
+      <if test="uploadCount != null">
+        upload_count = upload_count+1,
+      </if>
+    </set>
+    where file_id = #{fileId,jdbcType=INTEGER}
+  </update>
+  
+  
+  <update id="updateByPrimaryKey" parameterType="com.zp.pojo.UploadFile">
+    update m_file
+    set file_name = #{fileName,jdbcType=CHAR},
+      file_description = #{fileDescription,jdbcType=VARCHAR},
+      file_size = #{fileSize,jdbcType=INTEGER},
+      file_url = #{fileUrl,jdbcType=VARCHAR},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      upload_count = #{uploadCount,jdbcType=INTEGER}
+    where file_id = #{fileId,jdbcType=INTEGER}
+  </update>
+</mapper>

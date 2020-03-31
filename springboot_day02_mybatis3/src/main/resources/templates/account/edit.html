@@ -1,0 +1,24 @@
+<form role="form" id="formDataId">
+          <input type="hidden" th:value="${user.userId}" id="usersId"/>
+		  <div class="form-group">
+		    <label for="name">userName</label>
+		    <input type="text" class="form-control"  id="userName" th:value="${user.userName}" placeholder="请输入名称"/>
+		  </div>
+		  <div class="form-group">
+		    <label for="name">password</label>
+		    <input type="password" class="form-control"   id="password" th:value="${user.password}" placeholder="请输入密码"/>
+		  </div>
+		  <div class="form-group">
+		    <label for="name">createDate</label>
+		    <input type="text" class="form-control" id="createDate" th:value="${#dates.format(user.createDate,'yyyy-MM-dd')}" disabled="disabled"/>
+		  </div>
+		  <div class="radio">
+               <h4>role</h4>
+	             <label class="radio-inline"  th:each="userrole:${user.roles}"><!-- 这里是遍历系统中所有的roles -->
+	                  <input type="checkbox" name="roles" th:value="${userrole.roleId}" th:text="${userrole.roleName}" checked="checked"/>
+	             </label>
+	             <label class="radio-inline"  th:each="role:${roles}"><!-- 这里是遍历系统中所有的roles -->
+	                  <input type="checkbox" name="roles" th:value="${role.roleId}" th:text="${role.roleName}"/>
+	            </label>
+		 </div>
+</form>

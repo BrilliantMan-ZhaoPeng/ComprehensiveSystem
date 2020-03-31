@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head th:replace="~{account/fragments/header::header}">
+<meta charset="UTF-8">
+</head>
+<body>
+<div class="container" id="maincontainerId">
+		<table class="table table-hover">
+			<h3 class="text-center">用户信息表</h3>
+			<thead>
+				<tr>
+				    <th>userId</th>
+					<th>userName</th>
+					<th>password</th>
+					<th>createDate</th>
+					<th>roles</th>
+					<th>操作</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr th:each="user:${users}" th:object="${user}" th:if="${user.removeState} eq 0">
+					<td th:text="*{userId}" id="userIds"></td>
+					<td th:text="*{userName}"></td>
+					<td th:text="*{password}"></td>
+					<td th:text="${#dates.format(user.createDate,'yyyy-MM-dd')}"></td>
+					<td th:if="${not #lists.isEmpty(user.roles)}">
+					     <p th:each="role:${user.roles}" th:text="|${role.roleName}|"></p>
+					</td>
+					<td th:if="${#lists.isEmpty(user.roles)}">
+					     <p>无角色</p>
+					</td>
+					<td>
+					   <button class="btn btn-primary" data-toggle="modal" data-target="#myModal" id="editId" th:userId="*{userId}">编辑</button>
+					   <button type="button" class="btn btn-danger" id="delId" th:userId="*{userId}"> 删除</button>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+</div>
+
+
+<!-- 模态框（Modal） -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">用户信息</h4><span style="color:red" id="messageId"></span>
+            </div>
+            <div class="modal-body" id="contentId">
+            
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-primary" id="submitId">提交更改</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal -->
+</div>
+</div>
+</body>
+</html>
+<script type="text/javascript">
+$(document).on("click","#editId",function(){
+	  //获取编辑的数据
+	  //得到userId
+	  var userId=$(this).attr("userId");
+	  $.ajax({
+		  url:'/shiro/users/'+userId,
+		  type:'get',
+	      success:function(data){
+	    	  $("#contentId").html(data);
+	      },
+	      error:function(){
+	    	  alert("失败了");
+	      }
+	  })
+})
+
+$(document).on("click","#submitId",function(){
+	    //创建User对象
+       var user={};
+	   user.userId=$("#usersId").val();
+	   user.userName=$("#userName").val();
+	   user.password=$("#password").val();
+	   //创建
+       var roles = [];//定义一个空数组 
+	   $("input[type=checkbox]:checked").each(function(i){
+           roles[i] =$(this).val();
+	   });
+       user.roles=roles;
+	       $.ajax({
+	           url: "/shiro/users/",
+	           type: "PUT",
+	           contentType:'application/json;charset=utf-8',
+	           data:JSON.stringify(user),
+	           success: function (res) {
+	        	   if(res.flag){
+	        		   alert(res.message);
+	        		   window.location.reload();
+	        	   }else{
+	        		   $("#messageId").text(res.message);
+	        	   }
+	           }
+	       });
+})
+
+
+$(document).on("click","#delId",function(){
+	if(confirm("确定删除？？？")){
+		var userId=$(this).attr("userId");//得到userid的值
+		$.ajax({
+			url:'/shiro/users/'+userId,
+			type:'DELETE',
+		    success:function(){
+		    	alert("删除成功！！！");
+		    	window.location.reload();//刷新
+		    },
+		    error:function(){
+		    	alert("失败了");
+		    }
+		})
+	}
+})
+</script>
